@@ -1,0 +1,2153 @@
+{
+  "name": "Website content generation",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "=# System Message: Autonomous Content Strategist Agent (v19: Website Optional)\n\n## Persona\nYou are a **sharp, efficient, and professional Content Strategist Agent**. You operate as the project manager for a content analysis task. Your primary goal is to gather the full content brief—either by parsing a website **or**, if no website exists, by collecting the fields directly from the user. You finalize the process by saving the complete dataset along with the user's contact details.\n\n---\n\n## Core Mandate: The Golden Rule\n**You are FORBIDDEN from processing raw website data yourself.**  \nYour ONLY method for interacting with a website's content is through the `Website_Parser` tool. If no website is available, you must switch to conversational Q&A mode with the user.\n\n---\n\n## Core Principles\n1. **Delegate, then Synthesize**: Use `Website_Parser` exclusively for site data. For missing/no website, ask the user directly.  \n2. **Think Before You Speak**: After gathering data, use `Think` to synthesize and plan the draft brief.  \n3. **Persist Data Reliably**: Save the final, user-approved dataset in Google Sheets.\n\n---\n\n## Tools\n- **`Website_Parser`** – Your exclusive tool for parsing website content. Takes a `url` and a `query`.  \n- **`Tavily_Search`** – For competitor research ONLY.  \n- **`Think`** – For internal reasoning and structuring.  \n- **`Google_Sheets_Append_Row`** – For saving the final approved dataset.  \n\n---\n\n## Automated Workflow\n\n### Step 1: URL Intake & Validation\n- Ask the user for their **Web Page URL**.  \n- If a URL is provided:  \n  - Validate it using `Website_Parser` with query: *\"Confirm accessibility by extracting the page title.\"*  \n  - If invalid, ask again for a working link.  \n- If the user says they **do not have a website**, politely switch to **Q&A Mode** and start asking for each required field (see Step 2).\n\n### Step 2: Data Collection\n- **If Website Available (Parser Mode):**  \n  Sequentially extract fields using `Website_Parser`:  \n  - Industry  \n  - Target Audience  \n  - Location  \n  - Unique Selling Points (USPs) & Differentiators  \n\n- **If No Website (Q&A Mode):**  \n  Ask the user directly for:  \n  - **Website/Business Name**  \n  - **Page Type** (Home, About, Service, Blog, etc.)  \n  - **Industry**  \n  - **Target Audience**  \n  - **Location**  \n  - **USPs & Differentiators**  \n\n### Step 3: Research Competitors\n- Using `Industry` + `Location`, call `Tavily_Search` to find exactly **two competitor URLs**.\n\n### Step 4: Synthesize & Plan\n- Use `Think` to review all findings (from parser or user Q&A).  \n- Prepare a clear, structured draft brief.\n\n### Step 5: Present Draft & Confirmation\n- Present the draft using the **mandatory output format** below.  \n- Ask clarifying questions if fields are missing/unclear.  \n- Loop until the user approves the draft.\n\n### Step 6: Finalization & Storage\n- Ask for the **requester’s email address**.  \n- Save the final dataset (with email) via `Google_Sheets_Append_Row`.  \n- Confirm completion with:  \n  *\"All data has been verified and stored. Please type \"done\" in the chatbox to proceed with the content generation.\"*\n\n---\n\n## Output Structure for the Draft Brief (MANDATORY FORMAT)\n\n```markdown\n### 📝 Content Brief Draft for [Website/Business Name]\n\nHere is the draft I've prepared based on my analysis. Please review the details and let me know what needs to be changed or filled in.\n\n---\n\n**Website/Business Name:** [Name]  \n**Web Page URL:** [Web Page URL or \"No Website Provided\"]  \n**Page Type:** [From User]  \n\n**Industry:** [Industry]  \n**Target Audience:** [Target Audience]  \n**Location:** [Location or \"(Missing – please provide)\"]  \n\n**Unique Selling Points & Differentiators:**  \n- [USP 1]  \n- [USP 2]  \n- [USP 3]  \n\n**Competitor Reference Websites:**  \n- [Competitor URL 1]  \n- [Competitor URL 2]  \n\n---\n\n**My Questions for You:**  \n1. Could you please provide the **Location** if it's missing or incorrect?  \n2. Is the **Target Audience** I found accurate, or can you provide more detail?  \n3. Do you have a preferred **Page Type** for this content?  \n",
+          "maxIterations": 20
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -1680,
+        1472
+      ],
+      "id": "63451f8e-a2b8-4e5d-a6bd-1b5d86255d4e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw",
+          "mode": "list",
+          "cachedResultName": "Website Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Website Infos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Website Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Website_Name__using_to_match_', ``, 'string') }}",
+            "PageType": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('PageType', ``, 'string') }}",
+            "Web Page URL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Web_Page_URL', ``, 'string') }}",
+            "Industry": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Industry', ``, 'string') }}",
+            "Location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Location', ``, 'string') }}",
+            "Unique Selling Points": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Unique_Selling_Points', ``, 'string') }}",
+            "Market Strategy": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Market_Strategy', ``, 'string') }}",
+            "Consumption Differentiation": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Consumption_Differentiation', ``, 'string') }}",
+            "Competition/reference Websites": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Competition_reference_Websites', ``, 'string') }}",
+            "Customer Preferences": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Preferences', ``, 'string') }}",
+            "Target Audience": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Target_Audience', ``, 'string') }}",
+            "E-Mail Id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('E-Mail_Id', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Website Name"
+          ],
+          "schema": [
+            {
+              "id": "Website Name",
+              "displayName": "Website Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PageType",
+              "displayName": "PageType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Web Page URL",
+              "displayName": "Web Page URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Target Audience",
+              "displayName": "Target Audience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unique Selling Points",
+              "displayName": "Unique Selling Points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Market Strategy",
+              "displayName": "Market Strategy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Consumption Differentiation",
+              "displayName": "Consumption Differentiation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Competition/reference Websites",
+              "displayName": "Competition/reference Websites",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Preferences",
+              "displayName": "Customer Preferences",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "E-Mail Id",
+              "displayName": "E-Mail Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -1408,
+        1744
+      ],
+      "id": "7846aa7c-27b2-4d95-8556-b3ffa30883fd",
+      "name": "Data Storage sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7t4kYA113kk1pOZv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1568,
+        1744
+      ],
+      "id": "9fec6c04-b5e7-4c46-8d06-7af5ecaaf1f6",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hey, i'm your Data Collection agent, please start the conversation with a hi",
+        "options": {
+          "subtitle": "My job is to collect your information to generate apt data for your website.\n\nPlease wait for a few mins before the agent replies each time, it's most likely processing your inputs and gathering data from the sources you provided.",
+          "title": "Website Content Generator ",
+          "customCss": ":root {\n  /* Dark Gradient Colors */\n  --chat--gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);\n  --chat--gradient-secondary: linear-gradient(135deg, #ec4899 0%, #f97316 100%);\n  --chat--gradient-accent: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);\n  --chat--gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);\n  --chat--gradient-light: linear-gradient(135deg, #1e293b 0%, #334155 100%);\n  --chat--gradient-success: linear-gradient(135deg, #059669 0%, #0d9488 100%);\n  --chat--gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);\n  \n  /* Dark Solid Colors */\n  --chat--color-primary: #6366f1;\n  --chat--color-primary-shade-50: #4f46e5;\n  --chat--color-primary-shade-100: #4338ca;\n  --chat--color-secondary: #06b6d4;\n  --chat--color-secondary-shade-50: #0891b2;\n  --chat--color-white: #ffffff;\n  --chat--color-light: #1e293b;\n  --chat--color-light-shade-50: #334155;\n  --chat--color-light-shade-100: #475569;\n  --chat--color-medium: #64748b;\n  --chat--color-dark: #0f172a;\n  --chat--color-disabled: #94a3b8;\n  --chat--color-typing: #cbd5e1;\n  \n  /* Dark Glass morphism colors */\n  --chat--glass-bg: rgba(30, 41, 59, 0.8);\n  --chat--glass-border: rgba(148, 163, 184, 0.2);\n  --chat--glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);\n\n  /* Base Layout */\n  --chat--spacing: 1.5rem;\n  --chat--border-radius: 16px;\n  --chat--border-radius-small: 8px;\n  --chat--transition-duration: 0.3s;\n  --chat--font-family: (\n    -apple-system,\n    BlinkMacSystemFont,\n    'Segoe UI',\n    'Inter',\n    Roboto,\n    Oxygen-Sans,\n    Ubuntu,\n    Cantarell,\n    'Helvetica Neue',\n    sans-serif\n  );\n\n  /* Window Dimensions */\n  --chat--window--width: 420px;\n  --chat--window--height: 650px;\n  --chat--window--bottom: 2rem;\n  --chat--window--right: 2rem;\n  --chat--window--z-index: 9999;\n  --chat--window--border: 1px solid var(--chat--glass-border);\n  --chat--window--border-radius: var(--chat--border-radius);\n  --chat--window--margin-bottom: var(--chat--spacing);\n  --chat--window--backdrop-filter: blur(20px);\n  --chat--window--box-shadow: var(--chat--glass-shadow);\n\n  /* Header Styles */\n  --chat--header-height: auto;\n  --chat--header--padding: 2rem 1.5rem 1.5rem 1.5rem;\n  --chat--header--background: var(--chat--gradient-dark);\n  --chat--header--color: var(--chat--color-white);\n  --chat--header--border-top: none;\n  --chat--header--border-bottom: 1px solid rgba(148, 163, 184, 0.2);\n  --chat--header--border-left: none;\n  --chat--header--border-right: none;\n  --chat--heading--font-size: 1.75rem;\n  --chat--heading--font-weight: 700;\n  --chat--subtitle--font-size: 0.875rem;\n  --chat--subtitle--line-height: 1.6;\n  --chat--subtitle--opacity: 0.8;\n\n  /* Message Styles */\n  --chat--message--font-size: 0.95rem;\n  --chat--message--padding: 1.25rem 1.5rem;\n  --chat--message--border-radius: var(--chat--border-radius);\n  --chat--message-line-height: 1.6;\n  --chat--message--margin-bottom: 1.25rem;\n  --chat--message--bot--background: var(--chat--glass-bg);\n  --chat--message--bot--color: var(--chat--color-white);\n  --chat--message--bot--border: 1px solid var(--chat--glass-border);\n  --chat--message--bot--backdrop-filter: blur(10px);\n  --chat--message--user--background: var(--chat--gradient-primary);\n  --chat--message--user--color: var(--chat--color-white);\n  --chat--message--user--border: none;\n  --chat--message--user--box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.4);\n  --chat--message--pre--background: rgba(15, 23, 42, 0.8);\n  --chat--messages-list--padding: var(--chat--spacing);\n\n  /* Toggle Button */\n  --chat--toggle--size: 72px;\n  --chat--toggle--width: var(--chat--toggle--size);\n  --chat--toggle--height: var(--chat--toggle--size);\n  --chat--toggle--border-radius: 50%;\n  --chat--toggle--background: var(--chat--gradient-primary);\n  --chat--toggle--hover--background: var(--chat--gradient-secondary);\n  --chat--toggle--active--background: var(--chat--gradient-accent);\n  --chat--toggle--color: var(--chat--color-white);\n  --chat--toggle--box-shadow: 0 8px 24px 0 rgba(99, 102, 241, 0.4);\n  --chat--toggle--hover--box-shadow: 0 12px 32px 0 rgba(236, 72, 153, 0.5);\n\n  /* Input Area */\n  --chat--textarea--height: 56px;\n  --chat--textarea--max-height: 32rem;\n  --chat--input--font-size: 0.95rem;\n  --chat--input--border: 1px solid var(--chat--glass-border);\n  --chat--input--border-radius: var(--chat--border-radius-small);\n  --chat--input--padding: 1rem 1.25rem;\n  --chat--input--background: var(--chat--glass-bg);\n  --chat--input--text-color: var(--chat--color-white);\n  --chat--input--line-height: 1.5;\n  --chat--input--placeholder--font-size: var(--chat--input--font-size);\n  --chat--input--border-active: 1px solid var(--chat--color-primary);\n  --chat--input--left--panel--width: 3rem;\n  --chat--input--backdrop-filter: blur(10px);\n  --chat--input--box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.3);\n\n  /* Button Styles */\n  --chat--button--color: var(--chat--color-white);\n  --chat--button--background: var(--chat--gradient-primary);\n  --chat--button--padding: 0.75rem 1.5rem;\n  --chat--button--border-radius: var(--chat--border-radius-small);\n  --chat--button--hover--color: var(--chat--color-white);\n  --chat--button--hover--background: var(--chat--gradient-secondary);\n  --chat--button--box-shadow: 0 4px 12px 0 rgba(99, 102, 241, 0.3);\n  --chat--button--hover--box-shadow: 0 6px 16px 0 rgba(236, 72, 153, 0.4);\n  --chat--close--button--color-hover: var(--chat--color-primary);\n\n  /* Send and File Buttons */\n  --chat--input--send--button--background: var(--chat--gradient-primary);\n  --chat--input--send--button--color: var(--chat--color-white);\n  --chat--input--send--button--background-hover: var(--chat--gradient-secondary);\n  --chat--input--send--button--color-hover: var(--chat--color-white);\n  --chat--input--send--button--border-radius: 50%;\n  --chat--input--send--button--box-shadow: 0 4px 12px 0 rgba(99, 102, 241, 0.3);\n  --chat--input--file--button--background: var(--chat--glass-bg);\n  --chat--input--file--button--color: var(--chat--color-secondary);\n  --chat--input--file--button--background-hover: var(--chat--gradient-accent);\n  --chat--input--file--button--color-hover: var(--chat--color-white);\n  --chat--input--file--button--border-radius: 50%;\n  --chat--files-spacing: 0.5rem;\n\n  /* Body and Footer */\n  --chat--body--background: var(--chat--gradient-dark);\n  --chat--footer--background: var(--chat--glass-bg);\n  --chat--footer--color: var(--chat--color-white);\n  --chat--footer--backdrop-filter: blur(10px);\n  --chat--footer--border-top: 1px solid var(--chat--glass-border);\n}\n\n/* Enhanced Custom Styles */\n.chat-window {\n  backdrop-filter: var(--chat--window--backdrop-filter) !important;\n  box-shadow: var(--chat--window--box-shadow) !important;\n  background: var(--chat--glass-bg) !important;\n}\n\n.chat-header {\n  background: var(--chat--header--background) !important;\n  border-bottom: var(--chat--header--border-bottom) !important;\n  position: relative;\n  overflow: hidden;\n}\n\n.chat-header::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: var(--chat--gradient-glass);\n  opacity: 0.3;\n  pointer-events: none;\n}\n\n.chat-header h1 {\n  font-weight: var(--chat--heading--font-weight) !important;\n  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n.chat-header p {\n  opacity: var(--chat--subtitle--opacity);\n}\n\n.chat-message {\n  max-width: 85% !important;\n  backdrop-filter: var(--chat--message--bot--backdrop-filter);\n  transition: all var(--chat--transition-duration) ease;\n  position: relative;\n  overflow: hidden;\n}\n\n.chat-message.bot {\n  background: var(--chat--message--bot--background) !important;\n  border: var(--chat--message--bot--border) !important;\n  backdrop-filter: var(--chat--message--bot--backdrop-filter) !important;\n}\n\n.chat-message.user {\n  background: var(--chat--message--user--background) !important;\n  box-shadow: var(--chat--message--user--box-shadow) !important;\n  position: relative;\n}\n\n.chat-message.user::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);\n  pointer-events: none;\n}\n\n.chat-message:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.4);\n}\n\n.chat-input-area {\n  background: var(--chat--footer--background) !important;\n  backdrop-filter: var(--chat--footer--backdrop-filter) !important;\n  border-top: var(--chat--footer--border-top) !important;\n}\n\n.chat-input {\n  background: var(--chat--input--background) !important;\n  backdrop-filter: var(--chat--input--backdrop-filter) !important;\n  box-shadow: var(--chat--input--box-shadow) !important;\n  transition: all var(--chat--transition-duration) ease !important;\n  color: var(--chat--color-white) !important;\n}\n\n.chat-input:focus {\n  border: var(--chat--input--border-active) !important;\n  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;\n}\n\n.chat-toggle-button {\n  background: var(--chat--toggle--background) !important;\n  box-shadow: var(--chat--toggle--box-shadow) !important;\n  transition: all var(--chat--transition-duration) ease !important;\n  position: relative;\n  overflow: hidden;\n}\n\n.chat-toggle-button::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);\n  pointer-events: none;\n}\n\n.chat-toggle-button:hover {\n  background: var(--chat--toggle--hover--background) !important;\n  box-shadow: var(--chat--toggle--hover--box-shadow) !important;\n  transform: scale(1.05);\n}\n\n.chat-send-button {\n  background: var(--chat--input--send--button--background) !important;\n  box-shadow: var(--chat--input--send--button--box-shadow) !important;\n  border-radius: var(--chat--input--send--button--border-radius) !important;\n  transition: all var(--chat--transition-duration) ease !important;\n}\n\n.chat-send-button:hover {\n  background: var(--chat--input--send--button--background-hover) !important;\n  transform: scale(1.1);\n}\n\n.chat-file-button {\n  background: var(--chat--input--file--button--background) !important;\n  border-radius: var(--chat--input--file--button--border-radius) !important;\n  transition: all var(--chat--transition-duration) ease !important;\n}\n\n.chat-file-button:hover {\n  background: var(--chat--input--file--button--background-hover) !important;\n  color: var(--chat--input--file--button--color-hover) !important;\n  transform: scale(1.1);\n}\n\n/* Scrollbar Styling */\n.chat-messages::-webkit-scrollbar {\n  width: 6px;\n}\n\n.chat-messages::-webkit-scrollbar-track {\n  background: rgba(30, 41, 59, 0.3);\n  border-radius: 3px;\n}\n\n.chat-messages::-webkit-scrollbar-thumb {\n  background: var(--chat--gradient-primary);\n  border-radius: 3px;\n}\n\n.chat-messages::-webkit-scrollbar-thumb:hover {\n  background: var(--chat--gradient-secondary);\n}\n\n/* Typing indicator animation */\n@keyframes typing-dots {\n  0%, 20% { opacity: 0.4; }\n  50% { opacity: 1; }\n  80%, 100% { opacity: 0.4; }\n}\n\n.typing-indicator {\n  background: var(--chat--glass-bg) !important;\n  backdrop-filter: blur(10px) !important;\n}\n\n.typing-indicator::before {\n  content: '•••';\n  animation: typing-dots 1.5s infinite;\n}\n\n/* Modern focus states */\n*:focus {\n  outline: none;\n  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2480,
+        1408
+      ],
+      "id": "83f5ea07-60a8-4f00-9a39-98d8503fc04b",
+      "name": "When chat message received",
+      "webhookId": "574a9254-48cb-492c-b8f2-87c58900872f",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use to search web.",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "parametersBody": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -1136,
+        1728
+      ],
+      "id": "3b524dc8-549a-449a-be1e-8ec0f0dca2bc",
+      "name": "Tavily"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1728,
+        1744
+      ],
+      "id": "11e2d3c7-d60d-435e-ae41-defaf7c024aa",
+      "name": "Gemini 2.5 flash"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -752,
+        1664
+      ],
+      "id": "7edb2321-82a7-434e-9da4-98e327b3d58b",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool when you want to read the data from a website in order make sure you don't run out of context limit.\n\nEnsure you pass on URL and prompt clearly",
+        "workflowId": {
+          "__rl": true,
+          "value": "Atsv6JzUOlrKU04A",
+          "mode": "list",
+          "cachedResultName": "Parse website data"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "URL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', ``, 'string') }}",
+            "Prompt": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "Prompt",
+              "displayName": "Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -1264,
+        1744
+      ],
+      "id": "726b4d3b-8c55-4e2f-a949-1b56bad24d17",
+      "name": "Website parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "const userinput = $input.first().json.chatInput.trim().toLowerCase();\n\nif (userinput === \"done\") {\n  return [{ json: { done: true } }];\n} else {\n  return [{ json: { done: false } }];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2272,
+        1408
+      ],
+      "id": "7757439b-2636-406e-a895-79f77791b573",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "rno496mRLxkF0U0K",
+          "mode": "list",
+          "cachedResultName": "Content Generator"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -1504,
+        1328
+      ],
+      "id": "daed859f-8643-4392-a7bf-5d1e0898ee6b",
+      "name": "Execute Workflow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3386cf4f-cb24-4f3d-81b0-e911f9487dd3",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2064,
+        1408
+      ],
+      "id": "fde3d230-0fd6-4126-9418-43f95d2e85c3",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Sections generator').item.json.output }}",
+        "options": {
+          "systemMessage": "=***\n\nYou are a content generation worker. Your task is to process section briefs and append each as a **single new row one by one** to a Google Sheet without overwriting any existing data.\n\n**Process:**\n\n1. Receive inputs:  \n   - `Global_Context`: Template rules for tone, style, structure  \n   - `Section_Data`: List of section briefs\n\n2. For each section in `Section_Data`, do the following sequentially:  \n   - Generate SEO-optimized content strictly following the `Global_Context` template  \n   - Incorporate `sectionContentInfo`, `seoKeywords`, and `additionalInfo` properly  \n   - Call the `Website_Content` tool **to append exactly one new row at a time** to the Google Sheet  \n   - Wait for confirmation of successful append before processing the next section\n\n3. Repeat until all section briefs have been appended\n\n**Rules:**\n\n- Append rows only; never overwrite, update, or delete existing data  \n- Process and save every section without skipping  \n- Match content length within ±20% of the template  \n- No acknowledgments—start processing immediately  \n- Stop only when all sections are appended successfully one by one\n\n***\n",
+          "maxIterations": 20
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        208
+      ],
+      "id": "e3f40d1e-f022-40c0-82ac-8e941714d067",
+      "name": "Section wise content generator"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User Website Review Data:\n{{ $json.userWebsiteReview }}\n\nUser Details: \n{{ $json.userDetails }}\n\nCompetitor Website Insights: \n{{ $json.competitorInsights }}",
+        "options": {
+          "systemMessage": "=You are a **Senior UX Architect and SEO Strategist**. Your expertise lies in translating a business need into a logical, user-friendly, and search-engine-optimized website structure.\n\nYour sole task is to generate a comprehensive **Website Structure Blueprint** in a clean, structured Markdown format based on the page type provided by the user.\n\n-----\n\n### **Primary Directive**\n\nYou will be given a specific **[PAGE TYPE]** (e.g., \"SaaS Product Homepage,\" \"E-commerce Category Page,\" \"Local Business Services Page,\" \"Digital Course Landing Page\").\n\nBased on this input, you will generate a complete blueprint that outlines the ideal structural model, core components, content flow, and strategic guidelines for that specific page type.\n\n-----\n\n### **Core Principles to Adhere To**\n\n1.  **Logical Hierarchy**: The content must be organized from the general to the specific, creating a clear path for the user.\n2.  **Intuitive Navigation**: The structure should make it effortless for a user to understand where they are and where they can go next.\n3.  **SEO & Accessibility First**: The blueprint must incorporate best practices for both search engine visibility and accessibility (A11y).\n\n-----\n\n### **Required Output Format (Strict Markdown Structure)**\n\nYour final output must be a single, well-organized Markdown document. Follow this structure precisely.\n\n```markdown\n# Website Structure Blueprint for: [Your Specified PAGE TYPE]\n\nThis document outlines the foundational structure, content flow, and strategic guidelines for creating a successful [PAGE TYPE].\n\n## 1. Recommended Structural Model\n\n* **Model:** [Choose one: Hierarchical, Sequential, or Webbed]\n* **Justification:** Explain in 1-2 sentences why this model is the best fit for this specific [PAGE TYPE].\n\n## 2. Core Structural Components\n\nThese are the must-have elements that provide consistency and functionality across the page.\n\n### Header\n* **Purpose:** Provides site-wide branding and primary navigation.\n* **Key Elements:**\n    * Logo (linked to Homepage)\n    * Primary Navigation Menu\n    * A clear Call-to-Action (CTA) button (e.g., \"Get a Demo,\" \"Shop Now\")\n\n### Main Content Area\n* **Purpose:** To hold the unique content and narrative flow of the page, guiding the user from awareness to action.\n* **Key Elements:** A sequence of sections as defined in the \"Content Flow\" below.\n\n### Footer\n* **Purpose:** Contains secondary information, legal notices, and contact details.\n* **Key Elements:**\n    * Contact Information (Address, Phone, Email)\n    * Copyright Notice\n    * Links to Privacy Policy, Terms of Service\n    * Social Media Icons\n\n## 3. Section-by-Section Content Flow\n\nThis is the recommended top-to-bottom narrative for the page to maximize user engagement and conversion.\n\n### Section 1: Hero\n* **Purpose:** To grab the user's attention instantly, communicate the core value proposition, and drive a primary action.\n* **Content Guidelines:** A powerful headline, a concise sub-headline explaining the benefit, a high-quality visual, and a prominent CTA button.\n\n### Section 2: [Example: Problem/Solution or Core Offerings]\n* **Purpose:** [Explain the goal of this section for the specific PAGE TYPE]\n* **Content Guidelines:** [Provide guidelines on what content should go here]\n\n### Section 3: [Example: Social Proof/Testimonials]\n* **Purpose:** To build trust and credibility by showing that other people value the product/service.\n* **Content Guidelines:** Feature customer quotes, star ratings, or logos of client companies.\n\n### Section 4: [Example: Features & Benefits]\n* **Purpose:** To detail the key features and, more importantly, explain how they benefit the user.\n* **Content Guidelines:** Use icons, short descriptions, and focus on outcomes, not just technical specs.\n\n### Section 5: Call to Action (Final CTA)\n* **Purpose:** To provide a final, clear opportunity for the user to convert.\n* **Content Guidelines:** A compelling headline, a simple form or a large button, and reassurance (e.g., \"No credit card required\").\n\n*(Note: Add or modify sections as needed to best fit the provided [PAGE TYPE].)*\n\n## 4. Key Strategic Guidelines\n\n### Navigation & Internal Linking\n* **Primary Navigation:** List the recommended links for the header menu (e.g., \"Home,\" \"Features,\" \"Pricing,\" \"Contact\").\n* **Internal Linking Strategy:** Briefly explain how this page should link to other important pages on the site to help users and search engines.\n\n### Accessibility (A11y) Checklist\n* **Semantic HTML:** Use `<header>`, `<nav>`, `<main>`, and `<footer>` tags correctly.\n* **Image Alt Text:** All images must have descriptive alt text.\n* **Color Contrast:** Ensure text has sufficient contrast against its background.\n* **Keyboard Navigable:** All interactive elements should be accessible via keyboard.\n\n### On-Page SEO Best Practices\n* **Title Tag Guideline:** Suggest a formula (e.g., \"Primary Keyword | Brand Name\").\n* **Meta Description Guideline:** Advise writing a compelling summary (155-160 characters) that includes the primary keyword and a call-to-action.\n* **Header Tag Strategy:** `<h1>` should be used once for the main headline. Use `<h2>` for section titles and `<h3>` for sub-points.\n```"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        128,
+        208
+      ],
+      "id": "d9364cfb-cf70-4ced-b109-6e2708c03547",
+      "name": "Sections generator"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "value": "144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw",
+          "mode": "list",
+          "cachedResultName": "Website Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw/edit?usp=drivesdk"
+        },
+        "title": "={{ $('Code1').item.json.userDetails.websiteName }} - content - {{$now.format('DD, T')}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        576,
+        208
+      ],
+      "id": "faa8f196-32f3-4f9b-a8ef-d6ca7956b58b",
+      "name": "Content Generation",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7t4kYA113kk1pOZv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8950fa98-30f0-4a66-aa19-e1f440ee68af",
+              "name": "Section No.",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "136899eb-dd67-4999-99d7-43f41dbe9954",
+              "name": "Section Name",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "99f3c6c7-2e88-4b16-88ef-a052b0f26479",
+              "name": "Section Content Info",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "735d4524-87ae-45d6-9d3f-8f285d082526",
+              "name": "Keywords",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        752,
+        208
+      ],
+      "id": "8fbbe6e9-b804-488c-843d-b71682200786",
+      "name": "Header Settings"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw",
+          "mode": "list",
+          "cachedResultName": "Website Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Content Generation').item.json.sheetId }}",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Section No",
+              "displayName": "Section No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Section Name",
+              "displayName": "Section Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Section Content Info",
+              "displayName": "Section Content Info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Keywords",
+              "displayName": "Keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        928,
+        208
+      ],
+      "id": "1899d2ab-fc3f-43de-bc9c-17db500997e9",
+      "name": "Appending Content",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7t4kYA113kk1pOZv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a sharp, insightful, and **resilient Content Strategy Analyst** specializing in evaluating and optimizing websites for impact, user engagement, and content effectiveness. You expertly manage tool limitations and ensure smooth processing even if issues arise.\n\n***\n\n## **Primary Objective**  \n\nYour mission is to analyze the user’s own website via its URL. You will first validate that the URL is accessible using the `Website_Parser` tool. If successful, perform a detailed, holistic content analysis focused on uncovering strategic improvements. If the tool reports a critical error (e.g., a 4xx or 5xx status), terminate gracefully and report the failure clearly.\n\n***\n\n## **Inputs**  \n\n* **`website_url`**: The single direct URL of the user’s website to analyze.\n\n***\n\n## **Tool**  \n\n* **`Website_Parser`**: Your exclusive analytic tool. It accepts a `url` and a single broad query such as `\"Extract the full website content for detailed analysis.\"`  \n* The tool may return an error string (e.g., \"Error: Failed to fetch URL with status 404\") if the site is inaccessible.\n\n***\n\n## **Execution Plan & Error Handling Protocol**\n\n### Phase 1: Pre-flight Connectivity Check  \n1. Perform a quick content fetch by calling `Website_Parser` with the `website_url` and a generic query to confirm accessibility.  \n2. If the response contains an error indicator (e.g., \"Error:\", \"Failed to fetch\", \"status 403\", \"status 404\", \"status 500\"), immediately abort and output the failure report.  \n3. If successful, proceed to Phase 2.\n\n### Phase 2: Holistic Content Analysis  \n1. Use the **full website content** retrieved to analyze internally—no additional website parser calls.  \n2. Extract insights on these focus areas:  \n   - **Headline & Hook Strategy:** How effectively do they capture visitor attention?  \n   - **Value Proposition Clarity:** How clearly are core benefits and USPs communicated?  \n   - **Readability & Formatting:** Assess content structure for ease of reading and navigation.  \n   - **Call-to-Action (CTA) Analysis:** Review CTA prominence, wording, and placement effectiveness.  \n   - **Social Proof & Trust Signals:** Identify credibility builders like testimonials and case studies.  \n   - **Tone of Voice:** Characterize overall tone and alignment with intended audience.  \n3. Based on these insights, generate 3–5 targeted, actionable recommendations to improve content strategy and user engagement.\n\n### Phase 3: Output Assembly  \n- Format a consolidated report using the structure below and return it as the final output.\n\n***\n\n## **OUTPUT FORMATS (CRITICAL)**  \n\n### 1. On SUCCESS (Pre-flight check passed):  \n\nStatus: Success  \nURL Analyzed: {{ $json.url }}\n\nHeadline & Hook Strategy  \n[Detailed, insight-driven content]  \n\nValue Proposition Clarity  \n[Clear findings; if absent, state \"Information not found\"]  \n\nReadability & Formatting  \n[Analysis summary]  \n\nCall-to-Action (CTA) Analysis  \n[Insights on CTA effectiveness]  \n\nSocial Proof & Trust Signals  \n[Findings regarding credibility elements]  \n\nTone of Voice  \n[Description and audience alignment]  \n\nActionable Content Takeaways for My Website  \n[3–5 specific, prioritized recommendations]\n\n***\n\n### 2. On FAILURE (Pre-flight check failed):  \n\nStatus: Failure  \nURL Analyzed: {{ $json.url }}\n\nReason: The Website Parser tool could not access the URL due to a client or server error (e.g., 403 Forbidden, 404 Not Found, 500 Internal Server Error). The site may be unreachable, blocking scrapers, or the URL may be incorrect. Analysis has been aborted.\n",
+        "options": {
+          "maxIterations": 15
+        }
+      },
+      "id": "a8e38e33-eedb-4e08-ac09-9e94e16fd557",
+      "name": "Topic Wise information.",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -2416,
+        192
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2bc8ce2f-6d32-4ab9-9553-a42895f0b055",
+              "name": "Keywords",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1440,
+        176
+      ],
+      "id": "bd612796-449a-4910-9327-8f7e79233ded",
+      "name": "KeyWords"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw",
+          "mode": "list",
+          "cachedResultName": "Website Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Content Generation').item.json.sheetId }}",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Section No": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Section_No', `Add the section No. here`, 'string') }}",
+            "Section Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Section_Name', `Add the section name here`, 'string') }}",
+            "Section Content Info": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Section_Content_Info', `Add the generated content here`, 'string') }}",
+            "Keywords": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Keywords', `add all the keywords here `, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Section No",
+              "displayName": "Section No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Section Name",
+              "displayName": "Section Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Section Content Info",
+              "displayName": "Section Content Info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Keywords",
+              "displayName": "Keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        1360,
+        416
+      ],
+      "id": "40e01f0c-28e2-45de-ad0d-aea278ac4b19",
+      "name": "Website Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7t4kYA113kk1pOZv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.url }}",
+        "options": {
+          "systemMessage": "=# ROLE: Resilient Content Strategy Analyst  \nYou are a sharp, insightful, and **resilient Content Strategy Analyst**. You are an expert at deconstructing a competitor's content strategy. Critically, you are also designed to handle tool failures gracefully, ensuring that a single bad URL does not derail your entire process.\n\n***\n\n## **Primary Objective**  \nYour mission is to analyze a competitor's website via its URL. You will first validate that the URL is accessible with the `Website_Parser` tool. If successful, you will perform a detailed analysis. If the tool reports a critical error (e.g., a 4xx or 5xx status), you will terminate the analysis and report the failure clearly.\n\n## **Inputs**  \n* **`competitor_url`**: A single, direct URL to the competitor's website that you need to analyze.\n\n## **Tool**  \n* **`Website_Parser`**: Your exclusive tool for all website analysis. It takes a `url` and a `query`. It may sometimes return an error string (e.g., \"Error: Failed to fetch URL with status 404\") if the site is inaccessible.\n\n## **Execution Plan & Error Handling Protocol**\n\n**Phase 1: Pre-flight Connectivity Check**  \n1. **Initiate Check:** Perform a simple connectivity check by calling the `Website_Parser` tool with the `competitor_url` and a generic query (e.g., `\"Fetch website main content for validation\"`).  \n2. **Analyze Check Result:**  \n   * **IF** the tool returns a successful, complete content response (e.g., site title or main content), proceed to Phase 2.  \n   * **IF** the tool returns a response containing an error signature such as \"Error:\", \"Failed to fetch\", \"status 403\", \"status 404\", or \"status 500\", **immediately stop**. Output the structured failure report as described below.\n\n**Phase 2: Detailed Content Analysis (Only if Pre-flight Check Passes)**  \n1. **Unified Extraction:** Use the full website content retrieved from Phase 1 for all analyses. No additional calls to `Website_Parser`.  \n2. **Guided Analysis:** From the single content extraction, internally analyze and answer the following parameters:  \n    * **Headline & Hook Strategy:** Analyze the main headlines and hooks. How do they grab attention?  \n    * **Value Proposition Clarity:** How are the key value propositions and USPs communicated? Extract the most persuasive phrases.  \n    * **Readability & Formatting:** Describe how the content is structured for easy reading (e.g., short paragraphs, subheadings, bullet points).  \n    * **Call-to-Action (CTA) Analysis:** What are the primary CTAs? Analyze their language and placement.  \n    * **Social Proof & Trust Signals:** How does the site build credibility? Identify testimonials, case studies, or partner logos.  \n    * **Tone of Voice:** Describe the overall tone of voice and what it suggests about their target audience.  \n3. **Synthesize Takeaways:** Based on the above analyses, compile 3–5 specific, actionable content strategy recommendations.  \n4. **Assemble and Deliver:** Format and return the complete brief as per the `OUTPUT FORMATS` below.\n\n***\n\n## **OUTPUT FORMATS (CRITICAL)**\n\n### **1. On SUCCESS (Pre-flight check passed):**  \nStatus: Success  \nURL Analyzed: {{ $json.url }}  \n\nHeadline & Hook Strategy  \n[Extracted analysis content]  \n\nValue Proposition Clarity  \n[Extracted analysis content; if no information found, state \"Information not found\"]  \n\nReadability & Formatting  \n[Extracted analysis content]  \n\nCall-to-Action (CTA) Analysis  \n[Extracted analysis content]  \n\nSocial Proof & Trust Signals  \n[Extracted analysis content]  \n\nTone of Voice  \n[Extracted analysis content]  \n\nActionable Content Takeaways for My Website  \n[3-5 synthesized, actionable recommendations]\n\n### **2. On FAILURE (Pre-flight check failed):**  \nStatus: Failure  \nURL Analyzed: {{ $json.url }}  \n\nReason: The Website Parser tool failed to access the URL. This is likely due to a client-side or server-side error (e.g., 403 Forbidden, 404 Not Found, 500 Internal Server Error), meaning the site may be down, blocking scrapers, or the URL is incorrect. Analysis has been aborted for this competitor.\n",
+          "maxIterations": 15
+        }
+      },
+      "id": "17cb9e23-db24-4588-97e2-fa85cc408c34",
+      "name": "Topic Wise information.1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -784,
+        208
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2bc8ce2f-6d32-4ab9-9553-a42895f0b055",
+              "name": "Website Insights",
+              "value": "={{ $json.cleaned }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -272,
+        208
+      ],
+      "id": "334ef70c-f1cf-41cd-9879-2d0b392f3cbd",
+      "name": "Gather Website Insights"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "605d2830-99e5-4ce4-935d-8f0ab2cc1e92",
+              "name": "Website Review Data",
+              "value": "={{ $json.cleaned }} \nif nothing is mentioned, that means no website is linked.\n\nPlease refer to this to search for keywords if no website is linked:\ncompany name: {{ $('Initializing all fields with excel data').item.json['Website Name'] }}\nPage type: {{ $('Initializing all fields with excel data').item.json.PageType }}\nIndustry: {{ $('Initializing all fields with excel data').item.json.Industry }}\nLocation: {{ $('Initializing all fields with excel data').item.json.Location }}\nUnique Selling Points: {{ $('Initializing all fields with excel data').item.json['Unique Selling Points'] }}\nTarget audience: {{ $('Initializing all fields with excel data').item.json['Target Audience'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1904,
+        192
+      ],
+      "id": "22ef2119-2061-41f0-9abb-857ae25e75cb",
+      "name": "Website Parsing Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json[\"output\"]; // Replace \"output\" with your actual field name\n\nconst cleaned = input\n  // Remove all markdown headers (e.g., #, ##, ###)\n  .replace(/^#+\\s+/gm, '')\n\n  // Remove images and links, but keep the descriptive text\n  // e.g., ![alt text](url) or [link text](url) becomes \"alt text\" or \"link text\"\n  .replace(/!?\\[([^\\]]*)\\]\\([^)]+\\)/g, '$1')\n\n  // Remove list markers (e.g., *, -, 1., 2.)\n  .replace(/^\\s*([*\\-+]|\\d+\\.)\\s+/gm, '')\n\n  // Remove blockquote markers (e.g., >)\n  .replace(/^>\\s*/gm, '')\n\n  // Remove bold (**text**), italics (*text*), and strikethrough (~~text~~)\n  .replace(/(\\*\\*|__|\\*|_|~~)/g, '')\n\n  // Remove inline code backticks (`code`)\n  .replace(/`/g, '')\n\n  // Remove horizontal rules (---, ***, ___)\n  .replace(/^\\s*(?:---|\\*\\*\\*|___)\\s*$/gm, '')\n  \n  // Clean up any excess blank lines that may result from the cleaning\n  .replace(/\\n{2,}/g, '\\n')\n  .trim();\n\n\nreturn {\n  json: {\n    cleaned\n  }\n};"
+      },
+      "id": "4ebc70ff-1862-44f2-9d98-3b6e89d6ba11",
+      "name": "Prompt Data Cleaning 1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -2112,
+        192
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items[0].json.competitorLinks can be a string or array\nconst raw = $('Initializing all fields with excel data').first().json['Competition/reference Websites'];\n\n// Turn into array of strings\nlet arr = Array.isArray(raw) ? raw : String(raw || \"\")\n  .split(/[\\n,;|\\s]+/);\n\n// Clean, de-dupe, and ensure protocol\nconst norm = [...new Set(arr\n  .map(s => s.trim())\n  .filter(Boolean)\n.map(u =>\n  /^https?:\\/\\//i.test(u)         // already has http:// or https://\n    ? u\n    : `https://${u.replace(/^https?:/i, '')}` // strip lone \"http:\" or \"https:\" then add proper scheme\n)\n)];\n\n// Return one n8n item per URL: { url }\nreturn norm.map(url => ({ json: { url } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1072,
+        208
+      ],
+      "id": "fe9d26a3-ced5-4ba6-82a4-57638e813121",
+      "name": "URL Seperation"
+    },
+    {
+      "parameters": {
+        "jsCode": "// If this Code node is placed right after the previous node:\nconst items = $input.all(); \n// If not directly connected, use: const items = $('PrevNodeName').all();\n\nfunction cleanMd(md = \"\") {\n  return String(md)\n    .replace(/^#+\\s+/gm, '')                 // headers\n    .replace(/!?\\[([^\\]]*)\\]\\([^)]+\\)/g, '$1') // images/links -> keep text\n    .replace(/^\\s*([*\\-+]|\\d+\\.)\\s+/gm, '')  // list markers\n    .replace(/^>\\s*/gm, '')                  // blockquotes\n    .replace(/(\\*\\*|__|\\*|_|~~)/g, '')       // bold/italics/strike\n    .replace(/`/g, '')                       // inline code\n    .replace(/^\\s*(?:---|\\*\\*\\*|___)\\s*$/gm, '') // hr\n    .replace(/\\n{2,}/g, '\\n')                // excess newlines\n    .trim();\n}\n\nreturn items.map(it => {\n  // Change 'output' to your actual field name containing the markdown text\n  const raw = it.json?.output ?? it.json?.data ?? it.json?.body ?? \"\";\n  return { json: { ...it.json, cleaned: cleanMd(raw) } };\n});\n"
+      },
+      "id": "e60679a5-954b-46b2-a845-f8fd44682468",
+      "name": "Agent Data Cleaning",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -480,
+        208
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        864,
+        512
+      ],
+      "id": "22b63d52-c282-4237-87f6-4ec5bda2c950",
+      "name": "Gemini 2.5 Flash"
+    },
+    {
+      "parameters": {
+        "content": "## Research and Reviewing User's Website\n### This Entire section searches and collects data on the user's existing/previous website. The section also collects keywords for SEO from the existing website itself.\n(Currently limited to homepage.)",
+        "height": 352,
+        "width": 1568
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2704,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "81efb899-f395-4386-9029-f59bfd60586c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Research and Reviewing Competitors/Reference Website\n### This Entire section searches and collects data on reference website data\n(Currently limited to homepage.)",
+        "height": 352,
+        "width": 1552,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1280,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "8cdbb9dc-0ec2-43dc-96d2-3f6155ad7837",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Website Data Generation section",
+        "height": 432,
+        "width": 2416,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "ed7b43a0-b2f4-4927-b6c3-cb77c42fa99b",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "##  Section Generating.\nThis Part creates what sections are to be created in the page. It gives guidelines for the content generator agent.",
+        "height": 352,
+        "width": 512,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "94a04b2f-a81f-405e-b900-d4ff2c03e4d9",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Content Generation and review\nBased on the section guidelines and prompt, these agents generate content, review and complete the sections if any are missing.\n",
+        "height": 352,
+        "width": 912,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        512,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "152d6102-5467-4d13-9849-40abd4962682",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Feel free to change the models i'm using",
+        "height": 224,
+        "width": 256,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        672
+      ],
+      "typeVersion": 1,
+      "id": "9ac0bde3-b975-4e1a-a628-5dbf5743d8ec",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw",
+          "mode": "list",
+          "cachedResultName": "Website Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Content Generation').item.json.sheetId }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1888,
+        400
+      ],
+      "id": "30ca1078-df29-4dce-b785-bfe9061944a3",
+      "name": "get rows",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7t4kYA113kk1pOZv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a **Data-to-Document Formatting Agent**.  \nYour role is to fetch structured data from a Google Sheet and convert it into one clean, neatly formatted plain text string preserving **all original headings, subheadings, line breaks, and paragraph spacing** for optimal display in Google Docs or Word.  \n\n**Do not output markdown, code fences, or explanations—only plain text.**\n\n***\n## Primary Objective  \nFetch the entire dataset once, generate one consolidated text document string preserving all content formatting intact, and directly update this text into the target Google Doc using the **update document tool** in plain text format.  \n\n***\n## Inputs  \n- Website Name: `{{ $('Code1').item.json.userDetails.websiteName }}`  \n- Page Type: `{{ $('Code1').item.json.userDetails.pageType }}`\n\n***\n## Tool  \n- `get_sheet_data`: Fetches all content rows from the target Google Sheet.  \n- `update_doc`: Directly updates the Google Doc with plaintext content (no markdown).\n\n***\n## Execution Plan  \n1. Fetch all rows with `get_sheet_data`.  \n2. If no rows exist, update the Google Doc with:  \n   ```\n   [Website Name] - [Page Type]\n   No data available from the sheet. Please check inputs or try again later.\n   ```\n3. Otherwise build the document string:  \n   - Title line: `[Website Name] - [Page Type]`  \n   - Separator line: `===============================`  \n   - For each row:  \n     ```\n     [Section Number]. [Section Name]\n     --------------------------------\n     [Generated Content]\n     ```\n     (Preserve all original formatting in `[Generated Content]` exactly.)  \n   - Blank line after each section for readability  \n   - Footer:  \n     ```\n     --------------------------------\n     Next Steps:\n     Copy and paste each section into your website template.\n     Content generated with original formatting preserved for accuracy and visual clarity.\n     ```\n4. Send the final plain text string to the `update_doc` tool for direct update to the Google Doc.  \n\n***\n## Formatting Rules  \n- Preserve all line breaks, headings, subheadings, and paragraph spacing exactly as in input content.  \n- Use only plain text formatting; no markdown, HTML, or code fences.  \n- Use `=` and `-` lines only for titles and section dividers as described.\n\nOutput only the final plain text document string as input to the update document tool for immediate update.\n",
+        "needsFallback": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        208
+      ],
+      "id": "70d9cd6c-1667-490d-bfc4-380f84991ee7",
+      "name": "Html converter and mailing agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['Website Review Data'] }}",
+        "options": {
+          "systemMessage": "=# System Message: SEO Keyword Research Agent (v2 • n8n • Resilient • Strict Output)\n\n## Role\nYou are a resilient **SEO Keyword Research Agent** embedded in an n8n workflow.  \nYour job is to generate high-quality, context-specific keywords.  \nYou must always attempt the **Keyword Research tool** first, but if it fails, fall back to internal generation.\n\n---\n\n## Inputs\n\n### Primary Input\n- Use structured payload: `{{ $('Prompt Data Cleaning 1').item.json.cleaned }}`  \n- If no usable website/domain is present, treat it as **no website linked**.\n\n### Fallback Context (if no website is linked)\nUse these fields as-is:  \n- **Company Name** → `{{ $('Initializing all fields with excel data').item.json['Website Name'] }}`  \n- **Page Type** → `{{ $('Initializing all fields with excel data').item.json.PageType }}`  \n- **Industry / Field of Work** → `{{ $('Initializing all fields with excel data').item.json.Industry }}`\n- **Webpage URL** -> '{{ $('Initializing all fields with excel data').item.json['Web Page URL'] }}'\n- **Location of Operations** → `{{ $('Initializing all fields with excel data').item.json.Location }}`  \n- **Unique Selling Points** → `{{ $('Initializing all fields with excel data').item.json['Unique Selling Points'] }}`  \n- **Target Audience** → `{{ $('Initializing all fields with excel data').item.json['Target Audience'] }}`  \n- Competition/References: '{{ $('Initializing all fields with excel data').item.json['Competition/reference Websites'] }}' \n\n⚠️ If any field is missing/empty → ignore it.\n\n---\n\n## Tools\n- **`Keyword Research`**: Preferred tool for keyword discovery.  \n  Input: seed keywords.  \n  Output: keyword list.  \n\n---\n\n## Workflow\n\n1. **Analyze Context**  \n   - Consolidate details from **Primary Input** or **Fallback Context**.  \n   - Identify industry, service, USP, target audience, and location.  \n\n2. **Formulate Seed Keywords**  \n   - Derive 2–4 short, relevant seed terms.  \n   - Base them on service/industry + location + unique factors.  \n\n3. **Attempt Tool Execution**  \n   - Pass seed keywords to the **Keyword Research** tool.  \n   - If tool returns valid results → continue.  \n\n4. **Fallback (Tool Failure)**  \n   - If the tool errors, times out, or returns nothing:  \n     - Switch to **Internal Keyword Generation**.  \n     - Systematically generate keywords using context + patterns.  \n\n5. **Final Curation & Formatting**  \n   - Deduplicate and clean keywords.  \n   - Ensure correct **quantity** and **strict format**.  \n\n---\n\n## Internal Keyword Generation (Fallback Logic)\n\nGenerate variations using context-driven patterns:  \n\n- **Core Service + Location**: `[Service] in [Location]`, `best [Industry] [Location]`  \n- **Problem/Solution + USP**: `how to [solve X]`, `[USP] for [Target Audience]`  \n- **High-Intent Modifiers**: add `hire`, `cost`, `near me`, `reviews`, `pricing`, `services`  \n- **Informational Queries**: `what is [Industry term]`, `benefits of [Service]`, `[Location] [Industry] guide`  \n\n**Example**  \n- Context: Roofer, Dallas →  \n  `roof repair Dallas, emergency roofer near me, cost of new roof Dallas, best roofing company for homeowners`.  \n\n---\n\n## Keyword Curation Rules\n\n- Always proceed — never request clarification.  \n- Only output **relevant, niche-aligned, high-intent keywords**.  \n- Prefer **2–5 word phrases** over generic single words.  \n- Include **geo-modified variants** if location is present.  \n- No duplicates.  \n- No extra words, symbols, or formatting.  \n\n---\n\n## Output Format (STRICT)\n\n- One single line.  \n- Keywords **comma + space** separated.  \n- **No headings, bullets, counts, summaries, or explanations.**  \n- **Example (format only):**  \n  `keyword one, keyword two, keyword three`  \n\n---\n\n## Quantity\n\n- If `count` exists in `{{ $('Prompt Data Cleaning 1').item.json.cleaned }}` → output **exactly that many keywords**.  \n- If not specified → output **60 keywords** by default.  \n\n---\n\n## Intents Coverage\n\n- Ensure a **healthy mix of intents**:  \n  - Informational  \n  - Transactional  \n  - Local/geo-modified  \n  - Navigational (if brand is available)  \n\n---\n\n## Fallback (No Usable Context)\n\n- If **both Primary Input and Fallback Context are empty**, output a **blank line**.  \n- This is the only valid case for an empty response.  \n\n---\n"
+        }
+      },
+      "id": "5724d74f-ed7c-4f5f-9483-5e5110f8261c",
+      "name": "list",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1744,
+        192
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $execution.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        368
+      ],
+      "id": "9665bb93-6d77-4d7b-beb6-b9702eefb00d",
+      "name": "Simple Memory2"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $execution.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        368
+      ],
+      "id": "cba5b1a2-c945-4f1f-aae2-af8bb96f15cd",
+      "name": "Simple Memory3"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $execution.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -688,
+        416
+      ],
+      "id": "cd371391-e9fa-4da6-897d-8301e33e0d0b",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $execution.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1792,
+        464
+      ],
+      "id": "3cce5bd5-fd05-440d-884a-c8f826d632a5",
+      "name": "Simple Memory4"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $execution.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -2320,
+        368
+      ],
+      "id": "1198ac05-2557-4296-a532-3f1456eba719",
+      "name": "Simple Memory5"
+    },
+    {
+      "parameters": {
+        "folderId": "1zzyoQoqrT4nvlFd6OnKMGK3ekvNH60zE",
+        "title": "=Website data for {{ $('Code1').item.json.userDetails.websiteName }} - {{ $('Code1').item.json.userDetails.pageType }} "
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        208
+      ],
+      "id": "1f205a15-02cd-4e6d-a816-1729a2455a3b",
+      "name": "Create a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "fuNVRBsqm8HQsyIN",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code1').item.json.userDetails.emailId }}",
+        "subject": "=Your website data for {{ $('Code1').item.json.userDetails.websiteName }} - {{ $('Code1').item.json.userDetails.pageType }}",
+        "emailType": "text",
+        "message": "The Content for your website has been attached as a google doc to this mail.",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          },
+          "ccList": "dhanush.cp@trilliantdigital.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2176,
+        208
+      ],
+      "id": "205f2dd5-c641-40b1-b3ad-9dd74bb09cf4",
+      "name": "Send a message",
+      "webhookId": "3440f2c5-af5f-433f-a608-c3f118ce19f4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c06tZoqjqGGotfAc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ea5fe98b-73d4-4cd6-aea1-200fff0fa06d",
+              "name": "Doc Id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1616,
+        208
+      ],
+      "id": "bf297f74-2c1f-432e-aa80-11f790cf1161",
+      "name": "Document ID"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Create a document').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2032,
+        208
+      ],
+      "id": "a705feec-a3e7-43f7-9aae-323df4431752",
+      "name": "Download file"
+    },
+    {
+      "parameters": {
+        "content": "Attaching the doc as a google doc to my mail.",
+        "height": 352,
+        "width": 960
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1424,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "d76ad98a-60b2-43a6-9512-dbb4f1957b77",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        112,
+        384
+      ],
+      "id": "908d665d-3625-4f7a-a507-05e4c5891615",
+      "name": "Gemini 2.0 Flash2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dd2b808a-4a7a-4519-ab54-7ba37ef5afc2",
+              "name": "row_number",
+              "value": "={{ $json.row_number }}",
+              "type": "number"
+            },
+            {
+              "id": "d0d2a0e4-269e-4c70-9029-5319c2f55b54",
+              "name": "Website Name",
+              "value": "={{ $json['Website Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "b22d6255-d6b8-433b-81ff-c8a343cde064",
+              "name": "PageType",
+              "value": "={{ $json.PageType }}",
+              "type": "string"
+            },
+            {
+              "id": "27d7359b-a1a9-49ae-b155-3eea3a194457",
+              "name": "Web Page URL",
+              "value": "={{ $json['Web Page URL'] }}",
+              "type": "string"
+            },
+            {
+              "id": "e23e5320-d301-4685-a567-19efefc723ab",
+              "name": "Industry",
+              "value": "={{ $json.Industry }}",
+              "type": "string"
+            },
+            {
+              "id": "26ce2a16-a75e-46cd-85bb-f1c5f9377672",
+              "name": "Location",
+              "value": "={{ $json.Location }}",
+              "type": "string"
+            },
+            {
+              "id": "6a75ef84-e938-44df-a04a-d0339200ff06",
+              "name": "Target Audience",
+              "value": "={{ $json['Target Audience'] }}",
+              "type": "string"
+            },
+            {
+              "id": "07fc4d39-8a12-4606-9f17-fc53c580d94d",
+              "name": "Unique Selling Points",
+              "value": "={{ $json['Unique Selling Points'] }}",
+              "type": "string"
+            },
+            {
+              "id": "768a8b76-5bb2-4bb7-8706-d747b7ec315e",
+              "name": "Market Strategy",
+              "value": "={{ $json['Market Strategy'] }}",
+              "type": "string"
+            },
+            {
+              "id": "fa870062-a7d9-4232-bbea-54767e7c8633",
+              "name": "Consumption Differentiation",
+              "value": "={{ $json['Consumption Differentiation'] }}",
+              "type": "string"
+            },
+            {
+              "id": "63a88204-48c6-4b2a-9ea4-b9adbafe2cf5",
+              "name": "Competition/reference Websites",
+              "value": "={{ $json['Competition/reference Websites'] }}",
+              "type": "string"
+            },
+            {
+              "id": "251a741f-f2ed-4e2b-a69e-6a72d790de36",
+              "name": "Customer Preferences",
+              "value": "={{ $json['Customer Preferences'] }}",
+              "type": "string"
+            },
+            {
+              "id": "776e5e0b-9ddd-440a-8772-3997ae19a4d1",
+              "name": "E-Mail Id",
+              "value": "={{ $json['E-Mail Id'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2816,
+        176
+      ],
+      "id": "38fda6a8-6e7a-49b9-8c3f-e02286c8e074",
+      "name": "Initializing all fields with excel data"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        736
+      ],
+      "id": "b3ceab31-c317-40ca-855c-acd601e2a9d0",
+      "name": "OpenRouter Chat Model"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3264,
+        176
+      ],
+      "id": "d1d5d25f-3a69-46a7-bec8-2ebe84678efc",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw",
+          "mode": "list",
+          "cachedResultName": "Website Content Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Website Infos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/144cd_8lCRnRFR2A4s4VT4PrOlC_QoC3KuoTkK9fgDpw/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3104,
+        176
+      ],
+      "id": "0dcf7fe5-b322-47ba-a6c6-30d06ce791a7",
+      "name": "Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7t4kYA113kk1pOZv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fetch user website review data\nconst userWebsiteReview = $('Website Parsing Data').first().json['Website Review Data'];\n\n// Fetch user details from Excel initialization step\nconst userDetailsNode = $('Initializing all fields with excel data').first().json;\nconst userDetails = {\n  websiteName: userDetailsNode['Website Name'],\n  pageType: userDetailsNode.PageType,\n  webPageURL: userDetailsNode['Web Page URL'],\n  industry: userDetailsNode.Industry,\n  location: userDetailsNode.Location,\n  targetAudience: userDetailsNode['Target Audience'],\n  uniqueSellingPoints: userDetailsNode['Unique Selling Points'],\n  marketStrategy: userDetailsNode['Market Strategy'],\n  consumptionDifferentiation: userDetailsNode['Consumption Differentiation'],\n  competitionReferences: userDetailsNode['Competition/reference Websites'],\n  emailId: userDetailsNode['E-Mail Id']\n};\n\n// Fetch and combine competitor insights into a comma-separated string\nconst competitorInsightsArray = $input.all().map(item => item.json['Website Insights']);\nconst combinedCompetitorInsights = competitorInsightsArray.join(', ');\n\n// Construct the final structured output object with clearly labeled fields\nreturn [\n  {\n    json: {\n      userWebsiteReview: userWebsiteReview,\n      userDetails: userDetails,\n      competitorInsights: combinedCompetitorInsights\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        208
+      ],
+      "id": "02ac77d7-15e6-4aa0-812b-f761f7c1d44f",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $('Create a document').item.json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('actionFields0_Text', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        384
+      ],
+      "id": "2d6bcf47-1d34-47de-a74a-a0f472435323",
+      "name": "Update Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "fuNVRBsqm8HQsyIN",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Keyword Research Tool - Supports intent-based filtering using filter[intents] parameter with values: I (Informational), T x\\(Transactional), N (Navigational), C (Commercial), L (Local)",
+        "url": "=https://api4.seranking.com/research/in/keywords/",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "domain"
+            },
+            {
+              "name": "type",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "order_field",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "order_type",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "page",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "limit",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "cols",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "filter[intents]",
+              "valueProvider": "modelOptional"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue",
+              "value": "Token a7ad641d64b513b911e36e304b105053e8192157"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        -1568,
+        512
+      ],
+      "id": "3a8bd709-d593-4d2b-afcd-71e98a3b564b",
+      "name": "Keyword Research"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $execution.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1744,
+        384
+      ],
+      "id": "36f4179f-0738-4177-ad1d-dea6bcfd602b",
+      "name": "Simple Memory6"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool when you want to read the data from a website in order make sure you don't run out of context limit.\n\nEnsure you pass on URL and prompt clearly",
+        "workflowId": {
+          "__rl": true,
+          "value": "OzM394pggyuOIbsr",
+          "mode": "list",
+          "cachedResultName": "Parser"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "URL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', ``, 'string') }}",
+            "Prompt": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "Prompt",
+              "displayName": "Prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -1504,
+        784
+      ],
+      "id": "875b2bf8-f9c0-47f4-930a-eb46203578a2",
+      "name": "Website parser1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1bd7251-ddeb-4256-8879-f2c59927a877",
+              "leftValue": "={{ $json['Web Page URL'] }}",
+              "rightValue": "[empty]",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2640,
+        176
+      ],
+      "id": "d8c344be-7014-4d4c-ab0c-f19db694cf8d",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the last item from all rows\nconst rows = $items();\nif (rows.length === 0) return [];\nreturn [ rows[rows.length - 1] ];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2960,
+        176
+      ],
+      "id": "f535a5c8-1b23-4464-a3fd-c827183e2943",
+      "name": "Code2"
+    }
+  ],
+  "pinData": {
+    "When chat message received": [
+      {
+        "json": {
+          "action": "sendMessage",
+          "sessionId": "2bf489ef-c7df-4ba4-881f-6d245b80abf6",
+          "chatInput": "Prime Epaq - Sustainable Industrial Packaging Solutions in India Industries page https://epaq.in/ Industrial Packaging Solutions India B2B industries and heavy manufacturing industries in South India End-to-end packaging solutions, Audit-ready compliance, Sustainability goals, Engineered multiple material systems, Protective polymer-based packaging, Eco-first packaging, Material circularity, Reliable wooden systems, Innovative design and validation process Not Provided Not Provided https://ufpi.com/our-businesses/ufp-international/, https://www.nefab.com/ Not Provided dhanush.cp@trilliantdigital.com"
+        }
+      }
+    ],
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "done": true
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Data Storage sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website parser": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Section wise content generator": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sections generator": {
+      "main": [
+        [
+          {
+            "node": "Content Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Generation": {
+      "main": [
+        [
+          {
+            "node": "Header Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Header Settings": {
+      "main": [
+        [
+          {
+            "node": "Appending Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Appending Content": {
+      "main": [
+        [
+          {
+            "node": "Section wise content generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Topic Wise information.": {
+      "main": [
+        [
+          {
+            "node": "Prompt Data Cleaning 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KeyWords": {
+      "main": [
+        [
+          {
+            "node": "URL Seperation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website Data": {
+      "ai_tool": [
+        [
+          {
+            "node": "Section wise content generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Topic Wise information.1": {
+      "main": [
+        [
+          {
+            "node": "Agent Data Cleaning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gather Website Insights": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website Parsing Data": {
+      "main": [
+        [
+          {
+            "node": "list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt Data Cleaning 1": {
+      "main": [
+        [
+          {
+            "node": "Website Parsing Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL Seperation": {
+      "main": [
+        [
+          {
+            "node": "Topic Wise information.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent Data Cleaning": {
+      "main": [
+        [
+          {
+            "node": "Gather Website Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Section wise content generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Sections generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get rows": {
+      "ai_tool": [
+        [
+          {
+            "node": "Html converter and mailing agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Html converter and mailing agent": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "list": {
+      "main": [
+        [
+          {
+            "node": "KeyWords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "Sections generator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "Section wise content generator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Topic Wise information.1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory4": {
+      "ai_memory": [
+        [
+          {
+            "node": "list",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory5": {
+      "ai_memory": [
+        [
+          {
+            "node": "Topic Wise information.",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document": {
+      "main": [
+        [
+          {
+            "node": "Document ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document ID": {
+      "main": [
+        [
+          {
+            "node": "Html converter and mailing agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.0 Flash2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "list",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Html converter and mailing agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Initializing all fields with excel data": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Topic Wise information.1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Topic Wise information.",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Html converter and mailing agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Sections generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "Html converter and mailing agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keyword Research": {
+      "ai_tool": [
+        [
+          {
+            "node": "list",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory6": {
+      "ai_memory": [
+        [
+          {
+            "node": "Html converter and mailing agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Website parser1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Topic Wise information.",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Topic Wise information.1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Website Parsing Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Topic Wise information.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Initializing all fields with excel data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9494c5e7-ba88-425d-b3f2-4235f5efcfcd",
+  "meta": {
+    "instanceId": "e5cc733c64690467d87c1e9fd0ce3fe8fa66d68f38a668de4504cf6eeadf511c"
+  },
+  "id": "HYdShfuoLsQQl4RO",
+  "tags": []
+}

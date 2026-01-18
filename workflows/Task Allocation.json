@@ -1,0 +1,379 @@
+{
+  "name": "Task Allocation",
+  "nodes": [
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1536,
+        976
+      ],
+      "id": "413acbe0-a621-4a4f-b5b0-226ddf1a3e97",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TMDuLxZLEDKHRrQp",
+          "name": "Chanda_dhanush_account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            },
+            {
+              "field": "hours",
+              "hoursInterval": 3
+            }
+          ]
+        }
+      },
+      "id": "5608f4fe-5919-47d2-a59d-ff0639de16eb",
+      "name": "Schedule Trigger1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -2000,
+        688
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "## GMAIL based task Allocation\n\n",
+        "height": 288,
+        "width": 1664
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2032,
+        608
+      ],
+      "typeVersion": 1,
+      "id": "9a6d2312-ee17-4a39-adc3-a108f7aa513a",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $('Edit Fields1').item.json['message id'] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -752,
+        608
+      ],
+      "id": "d7710c11-4718-4e63-b3ca-f07242e6e8a5",
+      "name": "Mark a message as read",
+      "webhookId": "60229674-b815-4930-aa9a-4caf8365c353",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c06tZoqjqGGotfAc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=From Mail: \nSource-Type: email\n\nFrom: {{ $json.From }}\nDate: {{ $json.Date }}\nSubject: {{ $json.Subject }}\n\n--- BODY ---\n{{ $json.contents }}\n\n---\n",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=## Your Role: Mail Categorization JSON API\n\nYou are a strict, ultra-efficient email filter agent. Your only job is to scan email content and output a **single JSON object** that classifies the mail. Never explain, never converse, never output anything except pure JSON.\n\n***\n\n## Classification Logic\n\n### Step 1: Scan Everything\n- Read the raw subject, sender, body, and any metadata.\n\n### Step 2: Ruthless Categorization\n- **\"To be reviewed\"** if the mail matches *any* of these:\n  - Job applications, interviews, offers, rejections, acceptances, recruiter messages.\n  - Password reset requests, account or subscription warnings, urgent reminders.\n  - Direct mentions of you or urgent family/friend stuff.\n  - Anything you’d hate to miss or regret ignoring later.\n- **\"To be ignored\"** if the mail is:\n  - Promotional, newsletter, bulk sales, event blasts, one-time offers, chain mail, non-urgent notifications, or anything that doesn’t directly affect your career or personal wellbeing, linked In Job availability noticifications\n  - Social media updates, generic product launches, spam, automated system alerts unless explicitly account/security related.\n\n### Step 3: Judgment Over Strict Rules\n- If the email is ambiguous, **prefer “To be ignored.”**\n- Only bump to “To be reviewed” when it’s honestly critical or personally relevant.\n\n***\n\n## Output\n\nYour reply must be a single valid JSON object in one of the following formats. No markdown, no code fences, no commentary, no whitespace outside JSON.\n\n### Unimportant\n```json\n{\n  \"category\": \"To be ignored\",\n  \"reason\": \"No critical, job-related, or personally significant content found.\"\n}\n```\n### Important\n```json\n{\n  \"category\": \"To be reviewed\",\n  \"reason\": \"Contains job, interview, urgent reminder, or personally vital content.\",\n  \"sender\": \"<sender email>\",\n  \"content\": \"<contents of mail>\"\n}\n```\n",
+          "maxIterations": 25
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1456,
+        688
+      ],
+      "id": "ad4947ab-9ca0-4449-ba66-ed2e1fe134c9",
+      "name": "Categorizer agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1033f6cc-e890-42bd-9f82-b79c7d528120",
+              "name": "=From",
+              "value": "={{ $json.headers.from }}",
+              "type": "string"
+            },
+            {
+              "id": "34785bd1-8b00-4bbb-968c-5f3db942a88b",
+              "name": "=Date",
+              "value": "={{ $json.headers.date }}",
+              "type": "string"
+            },
+            {
+              "id": "0b2f2494-353a-43f1-8f09-7a5a6b06afc4",
+              "name": "=Subject",
+              "value": "={{ $json.headers.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "e45f9100-54f7-4427-84cd-ba8b2ddfa79e",
+              "name": "=contents",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "1033ca4e-152f-4c11-9f75-8cfdbc465059",
+              "name": "=thread id",
+              "value": "= {{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "2521a216-055b-441a-b1d7-0983faf5757a",
+              "name": "message id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1648,
+        688
+      ],
+      "id": "4b4586f8-f35e-46fd-9742-fa7b6753dba8",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "simple": false,
+        "filters": {
+          "readStatus": "unread",
+          "receivedAfter": "={{ $now.minus(1,'days') }}"
+        },
+        "options": {}
+      },
+      "id": "3802bef4-af62-4932-8716-7dae017cbcba",
+      "name": "Get Unread Emails1",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -1824,
+        688
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "15fad45d-50ab-425e-8361-c69b05d557c9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "c06tZoqjqGGotfAc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Code for \"Run Once for Each Item\" mode\nconst item = $input.item.json;\n\n// Get the raw string output\nlet rawContent = item.output || \"\";\n\n// Simple check: does the string contain the exact phrase?\nconst isImportant = rawContent.includes('\"category\": \"To be reviewed\"');\n\nreturn {\n  json: {\n    isImportant: isImportant,\n    rawContent: rawContent\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1168,
+        688
+      ],
+      "id": "a14d29d1-b4bb-42b9-ad02-8e9eabef258b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7a9b574d-6393-4cf9-9850-92efbc6dbdaf",
+              "leftValue": "={{ $json.isImportant }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1008,
+        688
+      ],
+      "id": "0ffdae20-fb61-46af-a663-0ce6632a210a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        976
+      ],
+      "id": "fc7038e7-f86b-42bf-a4f7-d16b4196e844",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "XQ4oOUo5ZnUKAb3C",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger1": [
+      {
+        "json": {
+          "timestamp": "2026-01-04T15:00:31.010+05:30",
+          "Readable date": "January 4th 2026, 3:00:31 pm",
+          "Readable time": "3:00:31 pm",
+          "Day of week": "Sunday",
+          "Year": "2026",
+          "Month": "January",
+          "Day of month": "04",
+          "Hour": "15",
+          "Minute": "00",
+          "Second": "31",
+          "Timezone": "Asia/Kolkata (UTC+05:30)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Categorizer agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get Unread Emails1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorizer agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Categorizer agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Unread Emails1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Mark a message as read",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Categorizer agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "pUmef5WSjij3fpqR"
+  },
+  "versionId": "02c413fc-bb1c-4439-9134-5dc708a887f7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e5cc733c64690467d87c1e9fd0ce3fe8fa66d68f38a668de4504cf6eeadf511c"
+  },
+  "id": "F4NERgKDRTqiaYQG",
+  "tags": []
+}

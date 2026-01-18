@@ -1,0 +1,90 @@
+{
+  "name": "URL Parser",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.URL }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        384,
+        464
+      ],
+      "id": "b5abc475-a4bd-4733-b227-d08c705a004d",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "maxTries": 2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This function takes raw HTML and returns a concise, business-relevant text summary.\n// It's designed to be used in a separate n8n 'Code' node to pre-process data\n// before it ever reaches your AI agent, thus preventing token overload.\n\n// We expect the raw HTML to be passed in from the previous node's JSON data.\nconst rawHtml = $input.first().json.data;\n\nfunction extractBusinessRelevantContent(html) {\n  // Return an empty string if input is invalid.\n  if (!html || typeof html !== 'string') {\n    return \"\";\n  }\n\n  let text = html;\n\n  // --- STEP 1: Aggressive Initial Cleanup ---\n  // Remove non-content blocks and comments in one go.\n  text = text.replace(\n    /<(script|style|noscript|nav|footer|aside)[\\s\\S]*?>[\\s\\S]*?<\\/\\1>|<!--[\\s\\S]*?-->/gi,\n    \"\"\n  );\n\n  // --- STEP 2: Remove Common Interactive & Media Elements ---\n  // These rarely contain core business strategy content.\n  text = text.replace(\n    /<(button|form|input|select|textarea|svg|canvas|video|audio|iframe)[^>]*>[\\s\\S]*?<\\/\\1>/gi,\n    \"\"\n  );\n\n  // --- STEP 3: Remove Known Noise & Banners (More Robust Regex) ---\n  // Looks for common keywords in class, id, or role attributes.\n  text = text.replace(\n    /<div[^>]*?(?:class|id|role)=[\"'][^\"']*(cookie|popup|banner|modal|overlay|social|share)[^\"']*[\"'][^>]*>[\\s\\S]*?<\\/div>/gi,\n    \"\"\n  );\n\n  // --- STEP 4: Convert Structural Tags to Newlines & Strip All HTML ---\n  // This is the main step to convert HTML structure to plain text.\n  text = text.replace(/<br\\s*\\/?>|<\\/(p|div|h[1-6]|li|section|article|main)>/gi, \"\\n\");\n  text = text.replace(/<[^>]+>/g, \" \"); // Replace remaining tags with a space to avoid joining words.\n\n  // --- STEP 5: Decode HTML Entities ---\n  // A more comprehensive list of common entities.\n  const entities = {\n    '&nbsp;': ' ', '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '\"',\n    '&apos;': \"'\", '&cent;': '¢', '&pound;': '£', '&yen;': '¥', '&euro;': '€',\n    '&copy;': '©', '&reg;': '®'\n  };\n  text = text.replace(/&[a-z]+;/g, match => entities[match] || match);\n  text = text.replace(/&#(\\d+);/g, (match, dec) => String.fromCharCode(dec));\n\n\n  // --- STEP 6: Filter Lines Based on Noise Patterns ---\n  const lines = text.split('\\n');\n  const filteredLines = lines.filter(line => {\n    const cleanLine = line.trim().toLowerCase();\n\n    // Skip empty lines or very short fragments\n    if (cleanLine.length < 5) return false;\n\n    // A more aggressive list of common noise patterns to filter out\n    const noisePatterns = [\n      /^accept/, /^decline/, /cookie/, /privacy/, /terms/, /subscribe/,\n      /newsletter/, /follow us/, /social media/, /^home$/, /^about$/,\n      /^contact$/, /^services$/, /^products$/, /^blog$/, /^news$/,\n      /all rights reserved/, /read more/, /learn more/, /get started/,\n      /^(click|view|shop) here/\n    ];\n\n    // Test if the line contains any of the noise patterns\n    if (noisePatterns.some(pattern => pattern.test(cleanLine))) return false;\n\n    return true;\n  });\n\n\n  // --- STEP 7: Prioritize Content with a Scoring System ---\n  // This is the core logic to find the most valuable business information.\n  const businessKeywords = [\n    'industry', 'sector', 'market', 'specialize', 'client', 'customer', 'audience',\n    'b2b', 'b2c', 'target', 'serve', 'location', 'address', 'based in',\n    'headquartered', 'strategy', 'approach', 'methodology', 'process',\n    'solution', 'unique', 'different', 'competitive', 'advantage', 'expertise',\n    'company', 'business', 'service', 'product', 'about', 'mission', 'vision'\n  ];\n\n  const scoredLines = filteredLines.map(line => {\n    const lowerLine = line.toLowerCase();\n    let score = 0;\n    // Base score for having some substance\n    if (line.length > 50) score += 1;\n    // Keyword scoring\n    businessKeywords.forEach(keyword => {\n      if (lowerLine.includes(keyword)) score += 2;\n    });\n    // Huge bonus for highly relevant phrases\n    if (lowerLine.includes('about us') || lowerLine.includes('who we are')) score += 10;\n    if (lowerLine.includes('our services') || lowerLine.includes('what we do')) score += 8;\n    if (lowerLine.includes('why choose us') || lowerLine.includes('our advantage')) score += 8;\n    // Penalty for boilerplate\n    if (lowerLine.includes('©') || lowerLine.includes('copyright')) score -= 5;\n    return { line, score };\n  });\n\n  // --- STEP 8: Construct the Final, Token-Safe Output ---\n  // Sort by score and build the final text, ensuring it doesn't exceed a safe length.\n  const MAX_LENGTH = 8000; // A very safe character limit for most models\n  let currentLength = 0;\n  let finalContent = [];\n\n  scoredLines\n    .filter(item => item.score > 0)\n    .sort((a, b) => b.score - a.score)\n    .forEach(item => {\n      if (currentLength + item.line.length < MAX_LENGTH) {\n        finalContent.push(item.line.trim());\n        currentLength += item.line.length;\n      }\n    });\n\n  let finalText = finalContent.join('\\n');\n\n  // --- STEP 9: Final Cleanup ---\n  finalText = finalText.replace(/\\n\\s*\\n+/g, '\\n\\n'); // Collapse multiple newlines\n  finalText = finalText.replace(/[ \\t]+/g, ' ').trim(); // Normalize spaces\n\n  return finalText;\n}\n\n// Execute the function and prepare the output for the next node.\nconst cleanedData = extractBusinessRelevantContent(rawHtml);\n\nreturn { json: { processedContent: cleanedData }};"
+      },
+      "id": "24883f24-c42a-41c4-b31f-a1b49b4fbc50",
+      "name": "HTML Data cleaning ",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        576,
+        464
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "URL"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        192,
+        464
+      ],
+      "id": "0e5ddbb8-9710-48d4-baaf-a03340c68fff",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML Data cleaning ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "827ca85e-78a5-40d6-b30d-9b532e7a69de",
+  "meta": {
+    "instanceId": "e5cc733c64690467d87c1e9fd0ce3fe8fa66d68f38a668de4504cf6eeadf511c"
+  },
+  "id": "tp7xDcBwC2CjtuTl",
+  "tags": []
+}

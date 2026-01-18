@@ -1,0 +1,342 @@
+{
+  "name": "phonepe Statement Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "data0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e0d13d02-76b0-42ea-97bb-43fdf2f80d85",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nUser Input: {{ $('When chat message received').item.json.chatInput }}\n\nData output: {{ $json.text }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=You will receive a list of financial transactions, each including details such as merchant/store name, amount spent, type of transaction, and other relevant data. Your tasks are as follows:\n\n1. **Classification and Summation:**  \n   Classify each transaction into one of the following categories and calculate total expenditure per category:  \n   - **Fuel Expenses:** Payments related to fuel stations, petrol, diesel, filling stations.  \n   - **Meat-based Expenses:** Payments related to meat vendors or butchers.  \n   - **Groceries:** Payments to Manjunatha Mart, vegetable/fruit vendors, phillappa enterprises/businesses related to groceries, or miscellaneous grocery outlets.  \n   - **Online Purchases:** Payments to Amazon or other online retailers.  \n   - **Snacks:** Payments to Harshith, snack stalls, chat stalls, or similar small food/vending operators.  \n   - **Other Expenses:** Any transactions that do not clearly fit the above categories, listed separately with details and amounts.  \n\n2. **User Queries:**  \n   If the user asks any questions about any transaction, category, or total expenditure, answer them clearly and accurately based on the provided data.\n\n**Instructions:**  \n- Analyze transaction details and assign the most appropriate category based on merchant names or keywords.  \n- Compute and present the total amount spent under each category.  \n- Provide a clear summary report with totals per category.  \n- List any uncategorized or other expenses distinctly with their names and amounts.  \n- Respond to any user queries related to the transactions or summaries, providing relevant explanations or clarifications.  \n- Keep responses clear, concise, and focused on the user’s question or requested information.\n\n**Sample Input:**  \nA list of transactions, each with: Date, Merchant/Details, Type (Debit/Credit), and Amount.\n\n**Sample Output Format:**  \n- Total Fuel Expenses: ₹xxxxx  \n- Total Meat Expenses: ₹xxxxx  \n- Total Groceries: ₹xxxxx  \n- Total Online Purchases: ₹xxxxx  \n- Total Snacks and Miscellaneous: ₹xxxxx  \n- Other Expenses:  \n  - Merchant A: ₹xxx  \n  - Merchant B: ₹xxx  \n  ...  \n\nIf the user asks any follow-up questions, answer directly with relevant details or calculations as needed.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        0
+      ],
+      "id": "035f075f-df32-4d84-a146-52499d813944",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        528,
+        240
+      ],
+      "id": "59c58eee-973f-4639-b44c-4812c29bcf06",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "XQ4oOUo5ZnUKAb3C",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        224
+      ],
+      "id": "ef7d7d4f-afe6-44d6-96cf-069d18db0640",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TMDuLxZLEDKHRrQp",
+          "name": "Chanda_dhanush_account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        320
+      ],
+      "id": "359654ce-c449-4178-a133-bcb2d2f9638b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Whatever, just upload the pdf and state your needs",
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -560,
+        160
+      ],
+      "id": "80d33987-ccbb-42fa-8f0d-90b478825ef2",
+      "name": "When chat message received",
+      "webhookId": "894cfe6a-6e59-43a9-b27b-130617888a3f",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2b2b7524-018b-4f24-88ae-b38f22953fc2",
+              "leftValue": "={{ $json.files[0] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -256,
+        64
+      ],
+      "id": "a9dba884-f5e0-4046-9830-1f15a567e81b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node (JavaScript)\n\nconst inputText = $input.first().json.text;\n\nfunction parseTransactionTextToPlainTextExclude(text, excludeList) {\n  // Normalize newlines\n  text = text.replace(/\\\\n/g, '\\n');\n\n  // Define transaction regex to capture Type, Amount, and Details (payee)\n  const transactionPattern = new RegExp(\n    '(?<Type>[A-Z]+) ₹(?<Amount>[\\\\d,]+)(?<Details>[\\\\s\\\\S]*?)\\\\n' +\n    'Transaction ID [A-Z0-9]+\\\\n' +\n    'UTR No\\\\. [0-9]+\\\\n' +\n    'Paid by.?\\\\n[A-Z0-9]+', 'g'\n  );\n\n  const lines = [];\n  let match;\n  while ((match = transactionPattern.exec(text)) !== null) {\n    const to = match.groups.Details.trim();\n    if (excludeList.some(ex => to.includes(ex))) {\n      continue; // Skip excluded payees\n    }\n    const type = match.groups.Type.trim();\n    const amount = '₹' + match.groups.Amount.trim();\n    lines.push(`${type} | Amount: ${amount} | To: ${to}`);\n  }\n\n  return lines.join('\\n');\n}\n\nconst excludedPayees = ['XXXXXX3143', 'XXXXXXXXXXX0374'];\nconst outputText = parseTransactionTextToPlainTextExclude(inputText, excludedPayees);\n\n// Return as array of n8n items\nreturn [{ json: { text: outputText } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        0
+      ],
+      "id": "52821204-95d7-4110-b765-fc95b83c1ccc",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User Input: {{ $('When chat message received').item.json.chatInput }}\n",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "=You will receive a list of financial transactions, each including details such as merchant/store name, amount spent, type of transaction, and other relevant data. Your tasks are as follows:\n\n1. **Classification and Summation:**  \n   Classify each transaction into one of the following categories and calculate total expenditure per category:  \n   - **Fuel Expenses:** Payments related to fuel stations, petrol, diesel, filling stations.  \n   - **Meat-based Expenses:** Payments related to meat vendors or butchers.  \n   - **Groceries:** Payments to Manjunatha Mart, vegetable/fruit vendors, phillappa enterprises/businesses related to groceries, or miscellaneous grocery outlets.  \n   - **Online Purchases:** Payments to Amazon or other online retailers.  \n   - **Snacks:** Payments to Harshith, snack stalls, chat stalls, or similar small food/vending operators.  \n   - **Other Expenses:** Any transactions that do not clearly fit the above categories, listed separately with details and amounts.  \n\n2. **User Queries:**  \n   If the user asks any questions about any transaction, category, or total expenditure, answer them clearly and accurately based on the provided data.\n\n**Instructions:**  \n- Analyze transaction details and assign the most appropriate category based on merchant names or keywords.  \n- Compute and present the total amount spent under each category.  \n- Provide a clear summary report with totals per category.  \n- List any uncategorized or other expenses distinctly with their names and amounts.  \n- Respond to any user queries related to the transactions or summaries, providing relevant explanations or clarifications.  \n- Keep responses clear, concise, and focused on the user’s question or requested information.\n\n**Sample Input:**  \nA list of transactions, each with: Date, Merchant/Details, Type (Debit/Credit), and Amount.\n\n**Sample Output Format:**  \n- Total Fuel Expenses: ₹xxxxx  \n- Total Meat Expenses: ₹xxxxx  \n- Total Groceries: ₹xxxxx  \n- Total Online Purchases: ₹xxxxx  \n- Total Snacks and Miscellaneous: ₹xxxxx  \n- Other Expenses:  \n  - Merchant A: ₹xxx  \n  - Merchant B: ₹xxx  \n  ...  \n\nIf the user asks any follow-up questions, answer directly with relevant details or calculations as needed.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        432
+      ],
+      "id": "79806c8c-0d2f-4f65-9e15-dae6c11a4bd8",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        496,
+        688
+      ],
+      "id": "47da7104-ae02-4fcc-9184-e4e4ede54953",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "XQ4oOUo5ZnUKAb3C",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3-pro-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        304,
+        672
+      ],
+      "id": "f655bd1e-6534-47aa-a775-c3a6a294e0fc",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TMDuLxZLEDKHRrQp",
+          "name": "Chanda_dhanush_account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1a0215eb-5929-4e9f-bb62-a6a06c8976e1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e5cc733c64690467d87c1e9fd0ce3fe8fa66d68f38a668de4504cf6eeadf511c"
+  },
+  "id": "s2HqQawtaWLl8l6b",
+  "tags": []
+}
